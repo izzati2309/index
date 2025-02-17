@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Search Analytics | UBUS Admin</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --success-color: #4cc9f0;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        .navbar {
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+            background-color: #4361ee !important;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            position: relative;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            transform: translateY(-2px);
+        }
+
+        .nav-item {
+            position: relative;
+            margin: 0 0.25rem;
+        }
+
+        .nav-link {
+            padding: 0.8rem 1.2rem !important;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link:before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background-color: #fff;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover:before {
+            width: 100%;
+        }
+
+        .nav-item:hover .nav-link {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .nav-item.active .nav-link {
+            background-color: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+
+        .nav-item.active .nav-link:before {
+            width: 100%;
+        }
+
+        .navbar-toggler {
+            border: none;
+            padding: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-toggler:hover {
+            transform: scale(1.1);
+        }
+
+        .navbar-toggler:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .nav-icon {
+            margin-right: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover .nav-icon {
+            transform: scale(1.2);
+        }
+
+        /* Ripple effect */
+        .nav-link {
+            position: relative;
+        }
+
+        .ripple {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Ripple effect */
+        .nav-link {
+            position: relative;
+        }
+
+        .ripple {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Notification badge */
+        .badge-notify {
+            position: absolute;
+            top: 0;
+            right: 5px;
+            padding: 3px 5px;
+            border-radius: 50%;
+            font-size: 0.7rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .analytics-card {
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: none;
+            transition: transform 0.2s;
+        }
+        .analytics-card:hover {
+            transform: translateY(-5px);
+        }
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #007bff;
+            display: flex;
+            align-items: center;
+        }
+        .card-header i {
+            margin-right: 10px;
+            color: #007bff;
+        }
+        .table-responsive {
+            margin-top: 1rem;
+        }
+        .highlight {
+            background-color: #e3f2fd;
+            font-weight: bold;
+        }
+        .summary-stat {
+            padding: 1.5rem;
+            border-radius: 12px;
+            background: #f8f9fa;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            border-left: 4px solid #007bff;
+        }
+        .summary-stat:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        .stat-label {
+            font-weight: bold;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .stat-label i {
+            margin-right: 8px;
+            color: #007bff;
+        }
+        .stat-value {
+            font-size: 1.2rem;
+            color: #007bff;
+            margin-left: 28px;
+        }
+        .table thead th {
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #007bff;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #f1f8ff;
+        }
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .alert {
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/admin_dashboard">
+                <i class="fas fa-bus-alt nav-icon"></i>UBUS Admin
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin_dashboard">
+                            <i class="fas fa-tachometer-alt nav-icon"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/routes_management">
+                            <i class="fas fa-route nav-icon"></i>Routes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/schedules_management">
+                            <i class="fas fa-clock nav-icon"></i>Schedules
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/analytics">
+                            <i class="fas fa-chart-line nav-icon"></i>Analytics
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/driver_management">
+                            <i class="fas fa-users nav-icon"></i>Drivers
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/optimization">
+                            <i class="fas fa-magic nav-icon"></i>Optimization
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/accounts">
+                            <i class="fas fa-users nav-icon"></i>Accounts
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin_logout">
+                            <i class="fas fa-sign-out-alt nav-icon"></i>Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1 class="mb-4">
+            <i class="fas fa-chart-line text-primary"></i>
+            Search Analytics Dashboard
+        </h1>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Summary Statistics -->
+        <div class="card analytics-card">
+            <div class="card-header">
+                <i class="fas fa-chart-pie fa-lg"></i>
+                <h3 class="mb-0">Summary Statistics</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="summary-stat">
+                            <div class="stat-label">
+                                <i class="fas fa-search"></i>
+                                Total Searches
+                            </div>
+                            <div class="stat-value">{{ summary.total_searches }}</div>
+                        </div>
+                        <div class="summary-stat">
+                            <div class="stat-label">
+                                <i class="fas fa-calendar-day"></i>
+                                Busiest Day
+                            </div>
+                            <div class="stat-value">{{ summary.busiest_day }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="summary-stat">
+                            <div class="stat-label">
+                                <i class="fas fa-route"></i>
+                                Busiest Route
+                            </div>
+                            <div class="stat-value">{{ summary.busiest_route }}</div>
+                        </div>
+                        <div class="summary-stat">
+                            <div class="stat-label">
+                                <i class="fas fa-clock"></i>
+                                Busiest Time Window
+                            </div>
+                            <div class="stat-value">{{ summary.busiest_window }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="summary-stat">
+                    <div class="stat-label">
+                        <i class="fas fa-star"></i>
+                        Peak Hours
+                    </div>
+                    <div class="stat-value">
+                        <ul class="list-unstyled mb-0">
+                            {% for peak in summary.peak_hours %}
+                                <li class="mb-1">{{ peak }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hourly Distribution -->
+        <div class="card analytics-card">
+            <div class="card-header">
+                <i class="fas fa-clock fa-lg"></i>
+                <h3 class="mb-0">Hourly Search Distribution</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Hour</th>
+                                <th>Number of Searches</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for hour in analytics.hourly.data %}
+                                <tr>
+                                    <td>{{ hour.hour }}</td>
+                                    <td>{{ hour.count }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily Distribution -->
+        <div class="card analytics-card">
+            <div class="card-header">
+                <i class="fas fa-calendar-alt fa-lg"></i>
+                <h3 class="mb-0">Daily Search Distribution</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Day</th>
+                                <th>Number of Searches</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for day in analytics.daily.data %}
+                                <tr>
+                                    <td>{{ day.day }}</td>
+                                    <td>{{ day.count }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Popular Routes -->
+        <div class="card analytics-card">
+            <div class="card-header">
+                <i class="fas fa-route fa-lg"></i>
+                <h3 class="mb-0">Most Popular Routes</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Starting Point</th>
+                                <th>Destination</th>
+                                <th>Number of Searches</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for route in analytics.popular_routes %}
+                                <tr>
+                                    <td>{{ route.starting_point }}</td>
+                                    <td>{{ route.destination }}</td>
+                                    <td>{{ route.count }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Time Windows -->
+        <div class="card analytics-card">
+            <div class="card-header">
+                <i class="fas fa-hourglass-half fa-lg"></i>
+                <h3 class="mb-0">Time Window Analysis</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Time Window</th>
+                                <th>Number of Searches</th>
+                                <th>Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for window in analytics.time_windows %}
+                                <tr>
+                                    <td>{{ window.window }}</td>
+                                    <td>{{ window.count }}</td>
+                                    <td>{{ window.percentage }}%</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function checkLoginState() {
+            fetch('/check_session', {
+                method: 'GET',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.logged_in) {
+                    window.location.href = '/auth_login';
+                }
+            })
+            .catch(error => {
+                console.error('Session check failed:', error);
+                window.location.href = '/auth_login';
+            });
+        }
+
+        // Check session when page becomes visible
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                checkLoginState();
+            }
+        });
+
+        // Check session periodically
+        setInterval(checkLoginState, 60000); // Check every minute
+
+        // Check when page loads
+        document.addEventListener('DOMContentLoaded', checkLoginState);
+
+        // Check when navigating back
+        window.onpageshow = function(event) {
+            if (event.persisted) {
+                checkLoginState();
+            }
+        };
+
+        // Disable back button
+        history.pushState(null, null, location.href);
+        window.onpopstate = function() {
+            history.go(1);
+        };
+
+        // Show loading overlay when navigating
+        document.addEventListener('DOMContentLoaded', function() {
+            const loadingOverlay = document.querySelector('.loading-overlay');
+            
+            // Show loading when clicking navigation links
+            document.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    loadingOverlay.style.display = 'flex';
+                });
+            });
+
+            // Handle back/forward browser buttons
+            window.addEventListener('popstate', () => {
+                loadingOverlay.style.display = 'flex';
+            });
+        });
+
+        // Highlight peak hours in the hourly distribution table
+        document.addEventListener('DOMContentLoaded', function() {
+            const peakHours = Array.from(document.querySelectorAll('.stat-value li'))
+                .map(li => li.textContent.split(' ')[0]);
+
+            const hourlyTable = document.querySelector('.table');
+            if (hourlyTable) {
+                const rows = hourlyTable.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const hourCell = row.cells[0];
+                    if (peakHours.some(peak => hourCell.textContent.includes(peak))) {
+                        row.classList.add('highlight');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

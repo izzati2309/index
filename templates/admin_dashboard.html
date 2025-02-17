@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | UBUS</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --success-color: #4cc9f0;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        .navbar {
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+            background-color: #4361ee !important;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            position: relative;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            transform: translateY(-2px);
+        }
+
+        .nav-item {
+            position: relative;
+            margin: 0 0.25rem;
+        }
+
+        .nav-link {
+            padding: 0.8rem 1.2rem !important;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link:before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background-color: #fff;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover:before {
+            width: 100%;
+        }
+
+        .nav-item:hover .nav-link {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .nav-item.active .nav-link {
+            background-color: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+
+        .nav-item.active .nav-link:before {
+            width: 100%;
+        }
+
+        .navbar-toggler {
+            border: none;
+            padding: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-toggler:hover {
+            transform: scale(1.1);
+        }
+
+        .navbar-toggler:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .nav-icon {
+            margin-right: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover .nav-icon {
+            transform: scale(1.2);
+        }
+
+        /* Ripple effect */
+        .nav-link {
+            position: relative;
+        }
+
+        .ripple {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Dropdown animation */
+        @media (max-width: 991.98px) {
+            .navbar-collapse {
+                transform-origin: top;
+                transition: transform 0.3s ease;
+            }
+
+            .navbar-collapse.collapsing {
+                transform: scaleY(0);
+            }
+
+            .navbar-collapse.show {
+                transform: scaleY(1);
+            }
+
+            .nav-item {
+                opacity: 0;
+                transform: translateY(-10px);
+                animation: fadeInUp 0.3s forwards;
+            }
+
+            @keyframes fadeInUp {
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        }
+
+        .welcome-section {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+        }
+
+        .welcome-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 25px rgba(67, 97, 238, 0.1);
+        }
+
+        .welcome-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .datetime {
+            color: rgb(67, 97, 238);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .quote-box {
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.05), rgba(67, 97, 238, 0.1));
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid rgb(67, 97, 238);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .quote-box:hover {
+            transform: translateX(10px);
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(67, 97, 238, 0.15));
+        }
+
+        /* Enhanced Metric Cards */
+        .metric-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            height: 100%;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(67, 97, 238, 0.05));
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(67, 97, 238, 0.15);
+        }
+
+        .metric-card:hover::before {
+            opacity: 1;
+        }
+
+        .metric-icon {
+            font-size: 2.5rem;
+            color: rgb(67, 97, 238);
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover .metric-icon {
+            transform: scale(1.2) rotate(10deg);
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover .metric-value {
+            transform: scale(1.1);
+            color: rgb(67, 97, 238);
+        }
+
+        .metric-label {
+            font-size: 1.1rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Enhanced Action Cards */
+        .action-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .action-card::after {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(67, 97, 238, 0.05));
+            top: -50%;
+            left: -50%;
+            transform: rotate(45deg) translateY(100%);
+            transition: all 0.6s ease;
+            z-index: 1;
+        }
+
+        .action-card:hover::after {
+            transform: rotate(45deg) translateY(-20%);
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(67, 97, 238, 0.15);
+        }
+
+        .action-icon {
+            font-size: 2rem;
+            color: rgb(67, 97, 238);
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
+        }
+
+        .action-card:hover .action-icon {
+            transform: scale(1.2) rotate(10deg);
+        }
+
+        .action-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .action-description {
+            color: #6c757d;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Pulse Animation */
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(67, 97, 238, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(67, 97, 238, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(67, 97, 238, 0); }
+        }
+
+        .metric-card:active, .action-card:active {
+            animation: pulse 1s;
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/admin_dashboard">
+                <i class="fas fa-bus-alt nav-icon"></i>UBUS Admin
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/admin_dashboard">
+                            <i class="fas fa-tachometer-alt nav-icon"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/routes_management">
+                            <i class="fas fa-route nav-icon"></i>Routes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/schedules_management">
+                            <i class="fas fa-clock nav-icon"></i>Schedules
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/analytics">
+                            <i class="fas fa-chart-line nav-icon"></i>Analytics
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/driver_management">
+                            <i class="fas fa-users nav-icon"></i>Drivers
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/optimization">
+                            <i class="fas fa-magic nav-icon"></i>Optimization
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/accounts">
+                            <i class="fas fa-users nav-icon"></i>Accounts
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin_logout">
+                            <i class="fas fa-sign-out-alt nav-icon"></i>Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <body class="bg-light">
+        <div class="container-fluid py-4">
+            <!-- Welcome Section -->
+            <div class="welcome-section">
+                <h1 class="welcome-title">Welcome, Admin!</h1>
+                <div class="datetime">Saturday, February 1, 2025 at 10:25:05 AM</div>
+                <div class="quote-box">
+                    <i class="fas fa-quote-left fa-2x" style="color: rgb(67, 97, 238, 0.2); position: absolute; top: 10px; left: 10px;"></i>
+                    <p style="margin-left: 40px; margin-top: 10px; font-style: italic; color: #2c3e50;">
+                        "Efficiency is doing better what is already being done." - Peter Drucker
+                    </p>
+                </div>
+            </div>
+    
+            <!-- Metrics Row -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="metric-card">
+                        <i class="fas fa-route metric-icon"></i>
+                        <div class="metric-label">Active Routes</div>
+                        <div class="metric-value">25</div>
+                        <div class="text-success">
+                            <i class="fas fa-arrow-up"></i> 3 from last week
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="metric-card">
+                        <i class="fas fa-bus metric-icon"></i>
+                        <div class="metric-label">Total Buses</div>
+                        <div class="metric-value">42</div>
+                        <div class="text-success">
+                            <i class="fas fa-check-circle"></i> 98% operational
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="metric-card">
+                        <i class="fas fa-clock metric-icon"></i>
+                        <div class="metric-label">Peak Hours</div>
+                        <div class="metric-value">{{ peak_hours }}</div>
+                        <div class="text-info">
+                            <i class="fas fa-chart-line"></i> Based on user activity
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Action Cards -->
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="action-card" onclick="window.location.href='/routes_management'">
+                        <i class="fas fa-route action-icon"></i>
+                        <h3 class="action-title">Routes Management</h3>
+                        <p class="action-description">Manage bus routes and stops</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="action-card" onclick="window.location.href='/schedules_management'">
+                        <i class="fas fa-clock action-icon"></i>
+                        <h3 class="action-title">Schedules</h3>
+                        <p class="action-description">View and edit bus schedules</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="action-card" onclick="window.location.href='/optimization'">
+                        <i class="fas fa-magic action-icon"></i>
+                        <h3 class="action-title">Optimize</h3>
+                        <p class="action-description">Optimize bus schedules</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Original DateTime functions
+        function updateDateTime() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            document.querySelector('.datetime').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+
+        // Original Clock functions
+        function updateClock() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            document.getElementById('clock').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Initialize tooltips (original)
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Original Active nav item and DOM ready event
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check session when page loads (NEW)
+            fetch('/check_session', {
+                method: 'GET',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.logged_in || data.role !== 'administrator') {
+                    window.location.replace('/auth_login');
+                }
+            })
+            .catch(error => {
+                console.error('Session check failed:', error);
+                window.location.replace('/auth_login');
+            });
+
+            // Original code - Set active nav item based on current URL
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.parentElement.classList.add('active');
+                }
+
+                // Original ripple effect
+                link.addEventListener('click', function(e) {
+                    const ripple = document.createElement('span');
+                    ripple.classList.add('ripple');
+                    this.appendChild(ripple);
+
+                    const rect = this.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+
+                    ripple.style.left = `${x}px`;
+                    ripple.style.top = `${y}px`;
+
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+
+            // Original - Smooth collapse animation for mobile menu
+            const navbarToggler = document.querySelector('.navbar-toggler');
+            const navbarCollapse = document.querySelector('.navbar-collapse');
+
+            navbarToggler.addEventListener('click', function() {
+                if (navbarCollapse.classList.contains('show')) {
+                    navbarCollapse.style.transform = 'scaleY(0)';
+                    setTimeout(() => {
+                        navbarCollapse.classList.remove('show');
+                    }, 300);
+                }
+            });
+
+            // Original - Add delay to mobile menu items
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach((item, index) => {
+                item.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+
+        // Original hover animation for metric cards
+        document.querySelectorAll('.metric-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.querySelector('i').style.transform = 'scale(1.2) rotate(5deg)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.querySelector('i').style.transform = 'scale(1) rotate(0deg)';
+            });
+        });
+
+        // Original loading animation for nav cards
+        document.querySelectorAll('.nav-card').forEach(card => {
+            card.addEventListener('click', function() {
+                this.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    this.style.transform = 'translateY(-5px)';
+                }, 150);
+            });
+        });
+
+        // Enhanced session checking function (NEW)
+        function checkSession() {
+            fetch('/check_session', {
+                method: 'GET',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.logged_in || data.role !== 'administrator') {
+                    window.location.replace('/auth_login');
+                }
+            })
+            .catch(error => {
+                console.error('Session check failed:', error);
+                window.location.replace('/auth_login');
+            });
+        }
+
+        // Check session when page becomes visible (NEW)
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                checkSession();
+            }
+        });
+
+        // Prevent back button after logout (NEW)
+        window.addEventListener('popstate', function() {
+            checkSession();
+        });
+
+        // Prevent going back (NEW)
+        window.history.forward();
+        function noBack() {
+            window.history.forward();
+        }
+
+        // Check session every minute (NEW)
+        setInterval(checkSession, 60000);
+
+        // Additional back button prevention (NEW)
+        window.onunload = function() {};
+        window.onload = function() {noBack();};
+        window.onpageshow = function(event) {
+            if (event.persisted) {
+                noBack();
+            }
+        };
+    </script>
+</body>
+</html>

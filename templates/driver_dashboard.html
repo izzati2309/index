@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Driver Dashboard | UBUS</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .status-card {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+        }
+
+        .route-stops {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .route-stops li {
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .clock-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #007bff;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        #map {
+            height: 400px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .tracking-btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .start-tracking {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .stop-tracking {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .location-status {
+            padding: 5px 10px;
+            border-radius: 5px;
+            background-color: #6c757d;
+            color: white;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .bus-marker {
+            text-align: center;
+            color: #007bff;
+            font-size: 24px;
+        }
+
+        .bus-marker i {
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+
+        .accuracy-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 4px;
+            z-index: 1000;
+            font-weight: bold;
+        }
+
+        .accuracy-good { color: #28a745; }
+        .accuracy-medium { color: #ffc107; }
+        .accuracy-poor { color: #dc3545; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <a class="navbar-brand" href="#">
+            <i class="fas fa-bus mr-2"></i>UBUS Driver
+        </a>
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="/driver_account">
+                    <i class="fas fa-user-cog mr-2"></i>Account
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/admin_logout">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="row">
+            <!-- Driver Status Section -->
+            <div class="col-md-4">
+                <div class="card status-card">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-user-circle mr-2"></i>Driver Status
+                        </h5>
+                        <div class="driver-info">
+                            <p><strong>Name:</strong> {{ driver.name }}</p>
+                            <p><strong>License:</strong> {{ driver.license_number }}</p>
+                            <p><strong>Phone:</strong> {{ driver.phone }}</p>
+                            <p><strong>Email:</strong> {{ driver.email }}</p>
+                            <p><strong>Route:</strong> {{ driver.route.name if driver.route else 'Unassigned' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Time -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <div id="clock" class="clock-display">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Location Section -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-map-marker-alt mr-2"></i>Live Location
+                        </h5>
+                        <div id="locationStatus" class="location-status">Location tracking inactive</div>
+                        <div class="mb-3">
+                            <button id="startTracking" class="tracking-btn start-tracking">
+                                <i class="fas fa-play mr-2"></i>Start Tracking
+                            </button>
+                            <button id="stopTracking" class="tracking-btn stop-tracking" disabled>
+                                <i class="fas fa-stop mr-2"></i>Stop Tracking
+                            </button>
+                        </div>
+                        <div id="map"></div>
+                        <div class="mt-3">
+                            <small class="text-muted">Last update: <span id="lastUpdate">Never</span></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Route Information -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-route mr-2"></i>Route Details
+                        </h5>
+                        {% if route_info %}
+                        <h6 class="mb-3">Route: {{ route_info.name }}</h6>
+                        <ul class="route-stops">
+                            {% for stop in route_info.stops %}
+                            <li>
+                                <i class="fas fa-map-marker-alt mr-2 text-primary"></i>
+                                {{ stop }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p class="text-muted">No route currently assigned</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emergency Contact Section -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card bg-danger text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>Emergency Contacts
+                        </h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <p><strong>Dispatch:</strong> 1234-5678</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p><strong>Maintenance:</strong> 8765-4321</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p><strong>Supervisor:</strong> 9999-0000</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>    
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        function checkLoginState() {
+            fetch('/check_session', {
+                method: 'GET',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.logged_in) {
+                    window.location.href = '/auth_login';
+                }
+            })
+            .catch(error => {
+                console.error('Session check failed:', error);
+                window.location.href = '/auth_login';
+            });
+        }
+
+        // Check session when page becomes visible
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                checkLoginState();
+            }
+        });
+
+        // Check session periodically
+        setInterval(checkLoginState, 60000); // Check every minute
+
+        // Check when page loads
+        document.addEventListener('DOMContentLoaded', checkLoginState);
+
+        // Check when navigating back
+        window.onpageshow = function(event) {
+            if (event.persisted) {
+                checkLoginState();
+            }
+        };
+
+        // Disable back button
+        history.pushState(null, null, location.href);
+        window.onpopstate = function() {
+            history.go(1);
+        };
+
+        // Clock initialization
+        function updateClock() {
+            const now = new Date();
+            const options = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            document.getElementById('clock').textContent = now.toLocaleDateString('en-US', options);
+        }
+        
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        /// Global variables for tracking
+        let map = L.map('map').setView([3.0733, 101.5185], 13); // Shah Alam coordinates
+        let marker;
+        let accuracyCircle;
+        let watchId = null;
+        let lastAccuracy = Infinity;
+        let updateCount = 0;
+        let successCount = 0;
+        let errorCount = 0;
+
+        // Add hybrid map layers
+        L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+            maxZoom: 20,
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+            attribution: '&copy; Google Maps'
+        }).addTo(map);
+
+        // Enhanced geolocation options
+        const geoOptions = {
+            enableHighAccuracy: true,    // Forces GPS usage
+            timeout: 10000,              // Increased timeout for better GPS lock
+            maximumAge: 0,              // Never use cached positions
+        };
+
+        // Position filter for consistency
+        class PositionFilter {
+            constructor() {
+                this.positions = [];
+                this.maxPositions = 3;  // Number of positions to keep for averaging
+                this.accuracyThreshold = 30; // Maximum acceptable accuracy in meters
+                this.lastGoodPosition = null;
+            }
+
+            addPosition(position) {
+                if (position.coords.accuracy <= this.accuracyThreshold) {
+                    this.positions.push({
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                        accuracy: position.coords.accuracy,
+                        timestamp: position.timestamp,
+                        heading: position.coords.heading || 0
+                    });
+
+                    // Keep only the most recent positions
+                    if (this.positions.length > this.maxPositions) {
+                        this.positions.shift();
+                    }
+
+                    this.lastGoodPosition = position;
+                    return this.getFilteredPosition();
+                } else if (this.lastGoodPosition) {
+                    return this.lastGoodPosition;
+                }
+                return null;
+            }
+
+            getFilteredPosition() {
+                if (this.positions.length === 0) return null;
+
+                // Calculate weighted average based on accuracy
+                let totalWeight = 0;
+                let sumLat = 0;
+                let sumLng = 0;
+                let sumHeading = 0;
+
+                this.positions.forEach(pos => {
+                    const weight = 1 / pos.accuracy; // More accurate positions get higher weight
+                    totalWeight += weight;
+                    sumLat += pos.lat * weight;
+                    sumLng += pos.lng * weight;
+                    sumHeading += pos.heading * weight;
+                });
+
+                return {
+                    coords: {
+                        latitude: sumLat / totalWeight,
+                        longitude: sumLng / totalWeight,
+                        accuracy: this.positions[this.positions.length - 1].accuracy,
+                        heading: sumHeading / totalWeight
+                    },
+                    timestamp: this.positions[this.positions.length - 1].timestamp
+                };
+            }
+        }
+
+        // Function to update accuracy indicator
+        function updateAccuracyIndicator(accuracy) {
+            const accuracyElement = document.getElementById('accuracyIndicator');
+            let className = 'accuracy-indicator ';
+            let text = `Accuracy: ${Math.round(accuracy)}m `;
+            
+            if (accuracy <= 10) {
+                className += 'accuracy-good';
+                text += '(Excellent)';
+            } else if (accuracy <= 30) {
+                className += 'accuracy-medium';
+                text += '(Good)';
+            } else {
+                className += 'accuracy-poor';
+                text += '(Poor)';
+            }
+            
+            if (!accuracyElement) {
+                const accuracyDiv = document.createElement('div');
+                accuracyDiv.id = 'accuracyIndicator';
+                accuracyDiv.className = className;
+                accuracyDiv.textContent = text;
+                map._container.appendChild(accuracyDiv);
+            } else {
+                accuracyElement.className = className;
+                accuracyElement.textContent = text;
+            }
+            
+            lastAccuracy = accuracy;
+        }
+
+        // Function to update map with new position
+        function updateMap(position, accuracy) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            const heading = position.coords.heading || 0;
+
+            if (marker) map.removeLayer(marker);
+            if (accuracyCircle) map.removeLayer(accuracyCircle);
+
+            // Create bus icon with rotation
+            const busIcon = L.divIcon({
+                className: 'bus-marker',
+                html: `<i class="fas fa-bus" style="transform: rotate(${heading}deg);"></i>`,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+
+            marker = L.marker([lat, lng], { icon: busIcon }).addTo(map);
+            
+            accuracyCircle = L.circle([lat, lng], {
+                radius: accuracy,
+                fillColor: '#3388ff',
+                fillOpacity: 0.1,
+                color: '#3388ff',
+                opacity: 0.3
+            }).addTo(map);
+
+            // Dynamic zoom based on accuracy
+            const zoomLevel = accuracy <= 10 ? 18 :
+                            accuracy <= 20 ? 17 :
+                            accuracy <= 30 ? 16 : 15;
+
+            map.setView([lat, lng], zoomLevel);
+            updateAccuracyIndicator(accuracy);
+        }
+
+        // Function to update server with new position
+        async function updateServer(position) {
+            try {
+                const response = await fetch('/update_driver_location', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                        accuracy: position.coords.accuracy,
+                        timestamp: new Date().getTime()
+                    })
+                });
+
+                const data = await response.json();
+                updateCount++;
+
+                if (data.status === 'success') {
+                    successCount++;
+                    document.getElementById('lastUpdate').style.color = '#28a745';
+                } else {
+                    errorCount++;
+                    document.getElementById('lastUpdate').style.color = '#dc3545';
+                }
+                
+                document.getElementById('lastUpdate').textContent = 
+                    `${new Date().toLocaleString()} (Accuracy: ${position.coords.accuracy.toFixed(1)}m)`;
+
+            } catch (error) {
+                console.error('Error updating server:', error);
+                errorCount++;
+            }
+        }
+
+        // Initialize position filter
+        const positionFilter = new PositionFilter();
+
+        // Function to start tracking
+        function startTracking() {
+            if (!navigator.geolocation) {
+                alert("Geolocation is not supported by this browser.");
+                return;
+            }
+
+            // Check if GPS is available
+            if ('permissions' in navigator) {
+                navigator.permissions.query({ name: 'geolocation' })
+                    .then(function(permissionStatus) {
+                        if (permissionStatus.state === 'granted') {
+                            initializeTracking();
+                        } else {
+                            alert("Please enable GPS for accurate tracking.");
+                        }
+                    });
+            } else {
+                initializeTracking();
+            }
+        }
+
+        // Initialize tracking with enhanced error handling
+        function initializeTracking() {
+            // Update UI
+            document.getElementById('startTracking').disabled = true;
+            document.getElementById('stopTracking').disabled = false;
+            document.getElementById('locationStatus').textContent = 'Acquiring GPS signal...';
+            document.getElementById('locationStatus').style.backgroundColor = '#ffc107';
+
+            // Start with a single high-accuracy position
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    if (position.coords.accuracy <= 30) { // Only start if accuracy is good
+                        startContinuousTracking();
+                        updateMap(position, position.coords.accuracy);
+                        document.getElementById('locationStatus').textContent = 'Location tracking active';
+                        document.getElementById('locationStatus').style.backgroundColor = '#28a745';
+                    } else {
+                        alert("Waiting for better GPS accuracy. Please ensure you're outdoors.");
+                        retryGPSLock();
+                    }
+                },
+                handleError,
+                geoOptions
+            );
+        }
+
+        // Continuous tracking function
+        function startContinuousTracking() {
+            watchId = navigator.geolocation.watchPosition(
+                async (position) => {
+                    const filteredPosition = positionFilter.addPosition(position);
+                    
+                    if (filteredPosition) {
+                        updateMap(filteredPosition, filteredPosition.coords.accuracy);
+                        await updateServer(filteredPosition);
+                        
+                        // Update status with accuracy info
+                        const accuracyText = `GPS Accuracy: ${Math.round(filteredPosition.coords.accuracy)}m`;
+                        document.getElementById('locationStatus').textContent = 
+                            `Tracking Active (${accuracyText})`;
+                    }
+                },
+                handleError,
+                geoOptions
+            );
+        }
+
+        // Enhanced error handling
+        function handleError(error) {
+            console.error("Location Error:", error);
+            let errorMessage = "Error getting location. ";
+            
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMessage += "Location permission denied. Please enable GPS.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMessage += "GPS signal unavailable. Please ensure you're outdoors.";
+                    break;
+                case error.TIMEOUT:
+                    errorMessage += "GPS signal timeout. Retrying...";
+                    retryGPSLock();
+                    return;
+                default:
+                    errorMessage += "Unknown error occurred. Please check GPS settings.";
+            }
+            
+            alert(errorMessage);
+            document.getElementById('locationStatus').textContent = 'GPS Error';
+            document.getElementById('locationStatus').style.backgroundColor = '#dc3545';
+        }
+
+        // Function to retry GPS lock
+        function retryGPSLock() {
+            document.getElementById('locationStatus').textContent = 'Retrying GPS lock...';
+            document.getElementById('locationStatus').style.backgroundColor = '#ffc107';
+            
+            setTimeout(() => {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        if (position.coords.accuracy <= 30) {
+                            startContinuousTracking();
+                        } else {
+                            retryGPSLock();
+                        }
+                    },
+                    handleError,
+                    geoOptions
+                );
+            }, 2000);
+        }
+
+        // Function to handle tracking stop
+        function stopTracking() {
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+
+            // Clear map markers
+            if (marker) map.removeLayer(marker);
+            if (accuracyCircle) map.removeLayer(accuracyCircle);
+
+            // Update UI
+            document.getElementById('startTracking').disabled = false;
+            document.getElementById('stopTracking').disabled = true;
+            document.getElementById('locationStatus').textContent = 'Location tracking inactive';
+            document.getElementById('locationStatus').style.backgroundColor = '#6c757d';
+        }
+
+        // Event listeners
+        document.getElementById('startTracking').addEventListener('click', startTracking);
+        document.getElementById('stopTracking').addEventListener('click', stopTracking);
+
+        // Debug information display
+        const debugInfo = document.createElement('div');
+        debugInfo.style.position = 'fixed';
+        debugInfo.style.bottom = '10px';
+        debugInfo.style.right = '10px';
+        debugInfo.style.background = 'rgba(0,0,0,0.8)';
+        debugInfo.style.color = 'white';
+        debugInfo.style.padding = '10px';
+        debugInfo.style.borderRadius = '5px';
+        debugInfo.style.fontSize = '12px';
+        debugInfo.style.display = 'none';
+        document.body.appendChild(debugInfo);
+
+        // Debug toggle button
+        const debugButton = document.createElement('button');
+        debugButton.textContent = 'Toggle Debug Info';
+        debugButton.className = 'btn btn-secondary btn-sm';
+        debugButton.style.position = 'fixed';
+        debugButton.style.bottom = '10px';
+        debugButton.style.right = '10px';
+        document.body.appendChild(debugButton);
+
+        debugButton.addEventListener('click', function() {
+            debugInfo.style.display = debugInfo.style.display === 'none' ? 'block' : 'none';
+    });
+
+    // Add setInterval here instead
+    setInterval(() => {
+        debugInfo.innerHTML = `
+            <strong>GIS Monitoring</strong><br>
+            Updates: ${updateCount}<br>
+            Success: ${successCount}<br>
+            Errors: ${errorCount}<br>
+            Success Rate: ${updateCount ? ((successCount/updateCount) * 100).toFixed(2) : 0}%<br>
+            Last Update: ${document.getElementById('lastUpdate').textContent}<br>
+            Last Accuracy: ${lastAccuracy.toFixed(1)}m
+        `;
+    }, 1000);
+    </script>
+</body>
+</html>

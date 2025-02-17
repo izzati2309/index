@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UBUS - Plan Your Trip</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
+    <style>
+        /* Custom styles for flatpickr */
+        .flatpickr-calendar {
+            background: #ffffff;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            border: none;
+            padding: 10px;
+        }
+        .flatpickr-day.selected {
+            background: #4a90e2;
+            border-color: #4a90e2;
+        }
+        .flatpickr-day:hover {
+            background: #e8f2ff;
+        }
+        .flatpickr-months .flatpickr-month {
+            color: #4a90e2;
+        }
+        .flatpickr-current-month .flatpickr-monthDropdown-months {
+            font-weight: 600;
+        }
+        .flatpickr-weekday {
+            color: #5d6d7e;
+        }
+    </style>
+    <style>
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .alert-error {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        .alert-warning {
+            color: #856404;
+            background-color: #fff3cd;
+            border-color: #ffeeba;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin-top: 30px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #007bff;
+            text-decoration: none;
+            margin-left: -15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .logo i {
+            font-size: 2rem;
+        }
+
+        .logo:hover {
+            text-decoration: none;
+            color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .admin-login {
+            color: #6c757d;
+            transition: all 0.3s ease;
+            margin-right: -15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: transparent;
+        }
+
+        .admin-login:hover {
+            color: #007bff;
+            text-decoration: none;
+            background: rgba(0, 123, 255, 0.1);
+        }
+
+        h1 {
+            color: #007bff;
+            font-weight: 600;
+            margin-bottom: 30px;
+            position: relative;
+            display: inline-block;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #007bff, transparent);
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .form-group .input-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #4a90e2;
+            transition: all 0.3s ease;
+        }
+        
+        .label-icon {
+            color: #5d6d7e;
+            margin-right: 5px;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            border: 2px solid #dee2e6;
+            height: 50px;
+            padding: 10px 40px;
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-control:focus {
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
+            border-color: #007bff;
+        }
+
+        .form-control:focus + i {
+            color: #0056b3;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+        }
+
+        .card-body {
+            padding: 30px;
+        }
+
+        label {
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        select.form-control {
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23007bff' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: calc(100% - 15px) center;
+            padding-right: 40px;
+        }
+
+        .form-control::placeholder {
+            color: #adb5bd;
+        }
+
+        /* Pulse animation for the Find Bus button */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .btn-primary:focus {
+            animation: pulse 1s infinite;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="{{ url_for('home') }}" class="logo">
+                <i class="fas fa-bus"></i>
+                UBUS
+            </a>
+            <a href="{{ url_for('auth_login') }}" class="admin-login">
+                <i class="fas fa-user-shield"></i>
+                Admin / Driver Login
+            </a>
+        </div>
+        <h1 class="text-center">Plan Your Trip</h1>
+
+        <!-- Flash Message (Only for schedule and bus-related messages) -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if 'login' not in message.lower() and 'password' not in message.lower() and 'admin' not in message.lower() %}
+                        <div class="alert alert-{{ category }}">
+                            {% if category == 'error' %}
+                                <i class="fas fa-exclamation-circle"></i>
+                            {% elif category == 'warning' %}
+                                <i class="fas fa-exclamation-triangle"></i>
+                            {% else %}
+                                <i class="fas fa-info-circle"></i>
+                            {% endif %}
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="card">
+            <div class="card-body">
+                <form action="{{ url_for('home') }}" method="post">
+                    <div class="form-group">
+                        <label for="travel_date">
+                            <i class="far fa-calendar-alt label-icon"></i>
+                            Travel Date:
+                        </label>
+                        <input type="text" class="form-control datepicker" id="travel_date" name="travel_date" placeholder="Select date" required readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="desired_time">
+                            <i class="far fa-clock label-icon"></i>
+                            Desired Arrival Time:
+                        </label>
+                        <input type="time" class="form-control" id="desired_time" name="desired_time" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="starting_point">
+                            <i class="fas fa-map-marker-alt label-icon"></i>
+                            Starting Point:
+                        </label>
+                        <select class="form-control" id="starting_point" name="starting_point" required>
+                            <option value="">Select a starting point</option>
+                            {% for stop in stops %}
+                                <option value="{{ stop }}">{{ stop }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="destination">
+                            <i class="fas fa-location-dot label-icon"></i>
+                            Destination:
+                        </label>
+                        <select class="form-control" id="destination" name="destination" required>
+                            <option value="">Select a destination</option>
+                            {% for stop in stops %}
+                                <option value="{{ stop }}">{{ stop }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-search"></i>
+                        Find Bus
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Initialize flatpickr date picker
+            flatpickr("#travel_date", {
+                dateFormat: "Y-m-d",
+                minDate: "today",
+                maxDate: new Date().fp_incr(30), // Allow booking up to 30 days in advance
+                disableMobile: false,
+                locale: {
+                    firstDayOfWeek: 1
+                },
+                onChange: function(selectedDates, dateStr, instance) {
+                    // You can add any additional logic here when date changes
+                    console.log('Selected date:', dateStr);
+                }
+            });
+
+            // Prevent selecting same location for start and destination
+            $('#destination').on('change', function() {
+                var startPoint = $('#starting_point').val();
+                var destination = $(this).val();
+                
+                if (startPoint && startPoint === destination) {
+                    alert('Starting point and destination cannot be the same!');
+                    $(this).val('');
+                }
+            });
+
+            $('#starting_point').on('change', function() {
+                var startPoint = $(this).val();
+                var destination = $('#destination').val();
+                
+                if (destination && startPoint === destination) {
+                    alert('Starting point and destination cannot be the same!');
+                    $(this).val('');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

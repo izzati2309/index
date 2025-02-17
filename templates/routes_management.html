@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Routes Management | UBUS Admin</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --success-color: #4cc9f0;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        .navbar {
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+            background-color: #4361ee !important;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            position: relative;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            transform: translateY(-2px);
+        }
+
+        .nav-item {
+            position: relative;
+            margin: 0 0.25rem;
+        }
+
+        .nav-link {
+            padding: 0.8rem 1.2rem !important;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link:before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background-color: #fff;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover:before {
+            width: 100%;
+        }
+
+        .nav-item:hover .nav-link {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .nav-item.active .nav-link {
+            background-color: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+
+        .nav-item.active .nav-link:before {
+            width: 100%;
+        }
+
+        .navbar-toggler {
+            border: none;
+            padding: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-toggler:hover {
+            transform: scale(1.1);
+        }
+
+        .navbar-toggler:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .nav-icon {
+            margin-right: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover .nav-icon {
+            transform: scale(1.2);
+        }
+
+        /* Ripple effect */
+        .nav-link {
+            position: relative;
+        }
+
+        .ripple {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Dropdown animation */
+        @media (max-width: 991.98px) {
+            .navbar-collapse {
+                transform-origin: top;
+                transition: transform 0.3s ease;
+            }
+
+            .navbar-collapse.collapsing {
+                transform: scaleY(0);
+            }
+
+            .navbar-collapse.show {
+                transform: scaleY(1);
+            }
+
+            .nav-item {
+                opacity: 0;
+                transform: translateY(-10px);
+                animation: fadeInUp 0.3s forwards;
+            }
+
+            @keyframes fadeInUp {
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        }
+        /* Dropdown animation */
+        @media (max-width: 991.98px) {
+            .navbar-collapse {
+                transform-origin: top;
+                transition: transform 0.3s ease;
+            }
+
+            .navbar-collapse.collapsing {
+                transform: scaleY(0);
+            }
+
+            .navbar-collapse.show {
+                transform: scaleY(1);
+            }
+
+            .nav-item {
+                opacity: 0;
+                transform: translateY(-10px);
+                animation: fadeInUp 0.3s forwards;
+            }
+
+            @keyframes fadeInUp {
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        }
+
+        /* Ripple effect */
+        .nav-link {
+            position: relative;
+        }
+
+        .ripple {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Notification badge */
+        .badge-notify {
+            position: absolute;
+            top: 0;
+            right: 5px;
+            padding: 3px 5px;
+            border-radius: 50%;
+            font-size: 0.7rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+
+        .route-card {
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .stop-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .stop-number {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+            background-color: #007bff;
+            color: white;
+            border-radius: 50%;
+            margin-right: 10px;
+            font-size: 0.8rem;
+        }
+        .drag-handle {
+            cursor: move;
+            color: #6c757d;
+            margin-right: 10px;
+        }
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1051;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/admin_dashboard">
+                <i class="fas fa-bus-alt nav-icon"></i>UBUS Admin
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin_dashboard">
+                            <i class="fas fa-tachometer-alt nav-icon"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/routes_management">
+                            <i class="fas fa-route nav-icon"></i>Routes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/schedules_management">
+                            <i class="fas fa-clock nav-icon"></i>Schedules
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/analytics">
+                            <i class="fas fa-chart-line nav-icon"></i>Analytics
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/driver_management">
+                            <i class="fas fa-users nav-icon"></i>Drivers
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/optimization">
+                            <i class="fas fa-magic nav-icon"></i>Optimization
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/accounts">
+                            <i class="fas fa-users nav-icon"></i>Accounts
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin_logout">
+                            <i class="fas fa-sign-out-alt nav-icon"></i>Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+
+    <!-- Toast Container -->
+    <div class="toast-container"></div>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-route"></i> Routes Management</h1>
+            <button class="btn btn-primary" onclick="openAddRouteModal()">
+                <i class="fas fa-plus"></i> Add New Route
+            </button>
+        </div>
+
+        <!-- Routes Container -->
+        <div id="routesContainer">
+            {% for route in routes %}
+            <div class="card route-card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{{ route.name }}</h5>
+                        <div>
+                            <button class="btn btn-info btn-sm" onclick="editRoute('{{ route.id }}')">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteRoute('{{ route.id }}')">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        {% for stop in route.stops %}
+                        <li class="stop-item">
+                            <span>
+                                <span class="stop-number">{{ loop.index }}</span>
+                                {{ stop.name }}
+                            </span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Add/Edit Route Modal -->
+    <div class="modal fade" id="routeModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Add New Route</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="routeForm">
+                        <input type="hidden" id="routeId">
+                        <div class="form-group">
+                            <label>Route Name</label>
+                            <input type="text" class="form-control" id="routeName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Number of Buses</label>
+                            <input type="number" class="form-control" id="busCount" min="1" required>
+                        </div>
+                        <div id="busNamesContainer"></div>
+                        <div class="form-group">
+                            <label>Stops</label>
+                            <div id="stopsContainer"></div>
+                            <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="addStopField()">
+                                <i class="fas fa-plus"></i> Add Stop
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveRoute()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal fade" id="confirmModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Action</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirmMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmButton">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+
+    <script>
+        function checkLoginState() {
+            fetch('/check_session', {
+                method: 'GET',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.logged_in) {
+                    window.location.href = '/auth_login';
+                }
+            })
+            .catch(error => {
+                console.error('Session check failed:', error);
+                window.location.href = '/auth_login';
+            });
+        }
+
+        // Check session when page becomes visible
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                checkLoginState();
+            }
+        });
+
+        // Check session periodically
+        setInterval(checkLoginState, 60000); // Check every minute
+
+        // Check when page loads
+        document.addEventListener('DOMContentLoaded', checkLoginState);
+
+        // Check when navigating back
+        window.onpageshow = function(event) {
+            if (event.persisted) {
+                checkLoginState();
+            }
+        };
+
+        // Disable back button
+        history.pushState(null, null, location.href);
+        window.onpopstate = function() {
+            history.go(1);
+        };
+
+        // Toast notification
+        function showToast(message, type = 'info') {
+            const toast = `
+                <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000">
+                    <div class="toast-header bg-${type} text-white">
+                        <strong class="mr-auto">Notification</strong>
+                        <button type="button" class="ml-2 mb-1 close" data-dismiss="toast">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="toast-body">${message}</div>
+                </div>
+            `;
+            $('.toast-container').append(toast);
+            $('.toast').toast('show');
+        }
+
+        // Route operations
+        function openAddRouteModal() {
+            $('#modalTitle').text('Add New Route');
+            $('#routeId').val('');
+            $('#routeForm')[0].reset();
+            $('#stopsContainer').empty();
+            addStopField();
+            addStopField();
+            $('#routeModal').modal('show');
+        }
+
+        function addStopField(value = '') {
+            const stopHtml = `
+                <div class="input-group mb-2">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text drag-handle">
+                            <i class="fas fa-grip-vertical"></i>
+                        </span>
+                    </div>
+                    <input type="text" class="form-control stop-input" 
+                           placeholder="Enter stop name" value="${value}" required>
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-danger" type="button" onclick="$(this).closest('.input-group').remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            $('#stopsContainer').append(stopHtml);
+        }
+
+        // Toast notification system
+        function showToast(message, type = 'info') {
+            const toastHtml = `
+                <div class="toast bg-white" role="alert">
+                    <div class="toast-header ${type === 'success' ? 'bg-success' : type === 'error' ? 'bg-danger' : 'bg-primary'} text-white">
+                        <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-2"></i>
+                        <strong class="mr-auto">${type === 'success' ? 'Success' : 'Notification'}</strong>
+                        <button type="button" class="ml-2 mb-1 close text-white" data-dismiss="toast">&times;</button>
+                    </div>
+                    <div class="toast-body">${message}</div>
+                </div>`;
+
+            const $toast = $(toastHtml);
+            $('.toast-container').append($toast);
+            $toast.toast({ delay: 3000 }).toast('show');
+            
+            $toast.on('hidden.bs.toast', function() {
+                $(this).remove();
+            });
+        }
+
+        // Add this function
+        function handleBusCountChange() {
+            const count = parseInt($('#busCount').val()) || 0;
+            const container = $('#busNamesContainer');
+            container.empty();
+            
+            for (let i = 1; i <= count; i++) {
+                container.append(`
+                    <div class="form-group">
+                        <label>Bus ${i} Name</label>
+                        <input type="text" class="form-control bus-name" required>
+                    </div>
+                `);
+            }
+        }
+
+        // Add event listener for bus count changes
+        $(document).ready(function() {
+            $('#busCount').on('change', handleBusCountChange);
+        });
+
+        // Update saveRoute function
+        async function saveRoute() {
+            const routeId = $('#routeId').val();
+            const routeName = $('#routeName').val();
+            const buses = $('.bus-name').map(function() {
+                return { name: $(this).val() };
+            }).get();
+            const stops = $('.stop-input').map(function() {
+                return { name: $(this).val() };
+            }).get();
+
+            if (!routeName || stops.length < 2) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+
+            const data = {
+                name: routeName,
+                stops: stops,
+                buses: buses
+            };
+
+            try {
+                const url = routeId ? `/api/routes/${routeId}` : '/api/routes';
+                const method = routeId ? 'PUT' : 'POST';
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Operation failed');
+                }
+
+                $('#routeModal').modal('hide');
+                showToast(routeId ? 'Route updated successfully!' : 'Route created successfully!', 'success');
+                setTimeout(() => location.reload(), 1000);
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        }
+
+        // Update openAddRouteModal
+        function openAddRouteModal() {
+            $('#modalTitle').text('Add New Route');
+            $('#routeId').val('');
+            $('#routeForm')[0].reset();
+            $('#stopsContainer').empty();
+            $('#busNamesContainer').empty();
+            $('#busCount').val(1);
+            handleBusCountChange();
+            addStopField();
+            addStopField();
+            $('#routeModal').modal('show');
+        }
+
+        async function editRoute(routeId) {
+            try {
+                const response = await fetch(`/api/routes/${routeId}`);
+                if (!response.ok) throw new Error('Failed to fetch route');
+                
+                const route = await response.json();
+                $('#modalTitle').text('Edit Route');
+                $('#routeId').val(route.id);
+                $('#routeName').val(route.name);
+                
+                // Set bus count and generate bus name fields
+                $('#busCount').val(route.buses.length);
+                handleBusCountChange();
+                
+                // Fill in bus names
+                route.buses.forEach((bus, index) => {
+                    $('.bus-name').eq(index).val(bus.name);
+                });
+                
+                // Fill in stops
+                $('#stopsContainer').empty();
+                route.stops.forEach(stop => addStopField(stop.name));
+                
+                $('#routeModal').modal('show');
+            } catch (error) {
+                showToast(error.message, 'danger');
+            }
+        }
+
+        function deleteRoute(routeId) {
+            $('#confirmMessage').text('Are you sure you want to delete this route? This action cannot be undone.');
+            
+            $('#confirmModal').modal('show');
+            $('#confirmButton').off('click').on('click', async function() {
+                try {
+                    const response = await fetch(`/api/routes/${routeId}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (!response.ok) throw new Error('Failed to delete route');
+
+                    $('#confirmModal').modal('hide');
+                    showToast('Route deleted successfully!', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } catch (error) {
+                    showToast(error.message, 'error');
+                }
+            });
+            }
+
+        // Initialize sortable stops
+        new Sortable(document.getElementById('stopsContainer'), {
+            handle: '.drag-handle',
+            animation: 150
+        });
+
+        function showToast(message, type = 'info') {
+            const typeColors = {
+                success: '#28a745',
+                danger: '#dc3545',
+                info: '#17a2b8',
+                warning: '#ffc107'
+            };
+
+            const toast = `
+                <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="5000">
+                    <div class="toast-header" style="background-color: ${typeColors[type]}; color: white">
+                        <strong class="mr-auto">
+                            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                            ${type === 'success' ? 'Success' : 'Notification'}
+                        </strong>
+                        <button type="button" class="ml-2 mb-1 close text-white" data-dismiss="toast">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    <div class="toast-body">${message}</div>
+                </div>
+            `;
+
+            $('.toast-container').append(toast);
+            $('.toast').toast({ autohide: true, delay: 5000 }).toast('show');
+            
+            // Remove toast after it's hidden
+            $('.toast').on('hidden.bs.toast', function() {
+                $(this).remove();
+            });
+        }
+    </script>
+</body>
+</html>

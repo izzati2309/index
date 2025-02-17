@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>System Optimization | UBUS Admin</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --success-color: #4cc9f0;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        .navbar {
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+            background-color: #4361ee !important;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            position: relative;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            transform: translateY(-2px);
+        }
+
+        .nav-item {
+            position: relative;
+            margin: 0 0.25rem;
+        }
+
+        .nav-link {
+            padding: 0.8rem 1.2rem !important;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link:before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background-color: #fff;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover:before {
+            width: 100%;
+        }
+
+        .nav-item:hover .nav-link {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .nav-item.active .nav-link {
+            background-color: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+
+        .nav-item.active .nav-link:before {
+            width: 100%;
+        }
+
+        .navbar-toggler {
+            border: none;
+            padding: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-toggler:hover {
+            transform: scale(1.1);
+        }
+
+        .navbar-toggler:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .nav-icon {
+            margin-right: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover .nav-icon {
+            transform: scale(1.2);
+        }
+
+        /* Ripple effect */
+        .nav-link {
+            position: relative;
+        }
+
+        .ripple {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .optimization-type-card {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+        }
+
+        .metric-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .metric-label {
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .optimization-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stats-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .parameter-info {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .progress {
+            height: 25px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .chart-container {
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        .metric-chart {
+            height: 200px !important;
+            max-height: 200px !important;
+            margin: 10px 0;
+        }
+
+        .optimization-results {
+            display: none;
+        }
+
+        .results-table {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .results-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .peak-hours-indicator {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background-color: #dc3545;
+            color: white;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+
+        .optimization-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .metric-chart {
+            height: 200px;
+            margin: 10px 0;
+        }
+
+        .demand-pattern {
+            padding: 15px;
+            background: #fff;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .pattern-header {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 10px;
+        }
+
+        .improvement-indicator {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .improvement-positive {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .improvement-negative {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/admin_dashboard">
+                <i class="fas fa-bus-alt nav-icon"></i>UBUS Admin
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin_dashboard">
+                            <i class="fas fa-tachometer-alt nav-icon"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/routes_management">
+                            <i class="fas fa-route nav-icon"></i>Routes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/schedules_management">
+                            <i class="fas fa-clock nav-icon"></i>Schedules
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/analytics">
+                            <i class="fas fa-chart-line nav-icon"></i>Analytics
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/driver_management">
+                            <i class="fas fa-users nav-icon"></i>Drivers
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/optimization">
+                            <i class="fas fa-magic nav-icon"></i>Optimization
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/accounts">
+                            <i class="fas fa-users nav-icon"></i>Accounts
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin_logout">
+                            <i class="fas fa-sign-out-alt nav-icon"></i>Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2 class="mb-4"><i class="fas fa-magic mr-2"></i>System Optimization</h2>
+
+        <!-- Current System Status -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Current System Status</h5>
+                <div class="optimization-stats">
+                    <div class="stats-card">
+                        <h6>Total Fleet Size</h6>
+                        <div class="metric-value" id="currentFleetSize">0</div>
+                    </div>
+                    <div class="stats-card">
+                        <h6>Active Routes</h6>
+                        <div class="metric-value" id="activeRoutes">0</div>
+                    </div>
+                    <div class="stats-card">
+                        <h6>Peak Hours</h6>
+                        <div class="metric-value" id="peakHours">--</div>
+                    </div>
+                    <div class="stats-card">
+                        <h6>Average Daily Trips</h6>
+                        <div class="metric-value" id="avgDailyTrips">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Optimization Parameters -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Optimization Parameters</h5>
+                <form id="optimizationForm">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Population Size</label>
+                                <input type="number" class="form-control" name="population_size" 
+                                       value="100" min="50" max="500">
+                                <div class="parameter-info">
+                                    Larger population = better results but slower optimization
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Generations</label>
+                                <input type="number" class="form-control" name="generations" 
+                                       value="200" min="50" max="1000">
+                                <div class="parameter-info">
+                                    More generations = better optimization accuracy
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Mutation Rate</label>
+                                <input type="number" class="form-control" name="mutation_rate" 
+                                       value="0.1" min="0" max="1" step="0.1">
+                                <div class="parameter-info">
+                                    Higher rate = more diverse solutions
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-play mr-2"></i>Start Optimization
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Optimization Results -->
+        <div id="results" class="card optimization-results">
+            <div class="card-body">
+                <h5 class="card-title">Optimization Results</h5>
+                
+                <!-- Overall Metrics -->
+                <div class="optimization-metrics">
+                    <div class="metric-card">
+                        <h6>Overall Fitness Score</h6>
+                        <div class="metric-value" id="fitnessScore">0.00</div>
+                        <canvas id="fitnessChart" class="metric-chart"></canvas>
+                    </div>
+                    <div class="metric-card">
+                        <h6>Optimization Metrics</h6>
+                        <canvas id="metricsChart" class="metric-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Detailed Results -->
+                <div class="card">
+                    <div class="card-body">
+                        <h6>Fleet Optimization Results</h6>
+                        <div class="table-responsive">
+                            <table class="table results-table" id="fleetResults">
+                                <thead>
+                                    <tr>
+                                        <th>Route</th>
+                                        <th>Current Fleet</th>
+                                        <th>Optimized Fleet</th>
+                                        <th>Change</th>
+                                        <th>Efficiency</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Schedule Optimization -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h6>Schedule Optimization</h6>
+                        <div id="scheduleResults">
+                            <!-- Schedule results will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Demand Patterns -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h6>Demand Pattern Analysis</h6>
+                        <div class="demand-pattern">
+                            <canvas id="demandChart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Optimizing...</span>
+            </div>
+            <p class="mt-2">Running Optimization...</p>
+            <div class="progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                     role="progressbar" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        function checkLoginState() {
+            fetch('/check_session', {
+                method: 'GET',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.logged_in) {
+                    window.location.href = '/auth_login';
+                }
+            })
+            .catch(error => {
+                console.error('Session check failed:', error);
+                window.location.href = '/auth_login';
+            });
+        }
+
+        // Check session when page becomes visible
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                checkLoginState();
+            }
+        });
+
+        // Check session periodically
+        setInterval(checkLoginState, 60000); // Check every minute
+
+        // Check when page loads
+        document.addEventListener('DOMContentLoaded', checkLoginState);
+
+        // Check when navigating back
+        window.onpageshow = function(event) {
+            if (event.persisted) {
+                checkLoginState();
+            }
+        };
+
+        // Disable back button
+        history.pushState(null, null, location.href);
+        window.onpopstate = function() {
+            history.go(1);
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const optimizationForm = document.getElementById('optimizationForm');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const resultsSection = document.getElementById('results');
+            
+            // Initialize Charts
+            let fitnessChart = null;
+            let metricsChart = null;
+            let demandChart = null;
+
+            function destroyCharts() {
+                if (fitnessChart) {
+                    fitnessChart.destroy();
+                    fitnessChart = null;
+                }
+                if (metricsChart) {
+                    metricsChart.destroy();
+                    metricsChart = null;
+                }
+                if (demandChart) {
+                    demandChart.destroy();
+                    demandChart = null;
+                }
+            }
+
+            function initializeCharts() {
+                // Fitness Chart
+                const fitnessCtx = document.getElementById('fitnessChart');
+                if (fitnessCtx) {
+                    destroyCharts(); // Add this line to ensure clean slate
+                    
+                    fitnessChart = new Chart(fitnessCtx, {
+                        type: 'line',
+                        data: {
+                            labels: ['Current'],
+                            datasets: [{
+                                label: 'Fitness Score',
+                                data: [0],
+                                borderColor: '#007bff',
+                                tension: 0.1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 100,
+                                    title: {
+                                        display: true,
+                                        text: 'Fitness Score (%)'
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return `${context.dataset.label}: ${context.formattedValue}%`;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+            
+            function initializeOptimizationCharts() {
+                // Destroy any existing charts first
+                destroyCharts();
+                
+                fetch('/api/optimization_metrics')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Raw optimization metrics:', data);  // Debug log
+
+                        if (data.status === 'success') {
+                            const metrics = data.metrics;
+                            
+                            // Initialize fitness score chart
+                            const fitnessCtx = document.getElementById('fitnessChart');
+                            if (fitnessCtx) {
+                                fitnessChart = new Chart(fitnessCtx, {
+                                    type: 'line',
+                                    data: {
+                                        labels: ['Current'],
+                                        datasets: [{
+                                            label: 'Fitness Score',
+                                            data: [metrics.fitness_score * 100], // Convert to percentage
+                                            borderColor: '#007bff',
+                                            tension: 0.1
+                                        }]
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        scales: {
+                                            y: {
+                                                beginAtZero: true,
+                                                max: 100,
+                                                title: {
+                                                    display: true,
+                                                    text: 'Fitness Score (%)'
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+
+                            // Initialize metrics radar chart
+                            const metricsCtx = document.getElementById('metricsChart');
+                            if (metricsCtx) {
+                                metricsChart = new Chart(metricsCtx, {
+                                    type: 'radar',
+                                    data: {
+                                        labels: ['Waiting Time', 'Utilization', 'Peak Coverage', 'Cost'],
+                                        datasets: [{
+                                            label: 'Optimization Metrics',
+                                            data: [
+                                                (metrics.fitness_metrics?.waiting_time || 0) * 100,
+                                                (metrics.fitness_metrics?.utilization || 0) * 100,
+                                                (metrics.fitness_metrics?.peak_coverage || 0) * 100,
+                                                (metrics.fitness_metrics?.cost || 0) * 100
+                                            ],
+                                            backgroundColor: 'rgba(0, 123, 255, 0.2)',
+                                            borderColor: '#007bff',
+                                            borderWidth: 2
+                                        }]
+                                    },
+                                    options: {
+                                        scales: {
+                                            r: {
+                                                beginAtZero: true,
+                                                max: 100
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+
+                            // Initialize demand pattern chart
+                            const demandCtx = document.getElementById('demandChart');
+                            if (demandCtx && metrics.demand_patterns) {
+                                console.log('Demand patterns data:', metrics.demand_patterns); // Debug log
+                                
+                                demandChart = new Chart(demandCtx, {
+                                    type: 'bar',
+                                    data: {
+                                        labels: Array.from({length: 24}, (_, i) => `${String(i).padStart(2, '0')}:00`),
+                                        datasets: [{
+                                            label: 'Passenger Demand',
+                                            data: metrics.demand_patterns,
+                                            backgroundColor: '#007bff',
+                                            borderColor: '#0056b3',
+                                            borderWidth: 1,
+                                            barPercentage: 0.8,
+                                            categoryPercentage: 0.9
+                                        }]
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        maintainAspectRatio: false,
+                                        scales: {
+                                            y: {
+                                                beginAtZero: true,
+                                                ticks: {
+                                                    precision: 2
+                                                },
+                                                title: {
+                                                    display: true,
+                                                    text: 'Demand Ratio',
+                                                    font: {
+                                                        size: 14,
+                                                        weight: 'bold'
+                                                    }
+                                                }
+                                            },
+                                            x: {
+                                                title: {
+                                                    display: true,
+                                                    text: 'Time of Day',
+                                                    font: {
+                                                        size: 14,
+                                                        weight: 'bold'
+                                                    }
+                                                },
+                                                grid: {
+                                                    display: false
+                                                }
+                                            }
+                                        },
+                                        plugins: {
+                                            legend: {
+                                                display: true,
+                                                position: 'top'
+                                            },
+                                            tooltip: {
+                                                callbacks: {
+                                                    title: (items) => `Time: ${items[0].label}`,
+                                                    label: (item) => `Demand Ratio: ${item.raw.toFixed(2)}`
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+                            } else {
+                                console.error('Missing demand chart element or demand patterns data');
+                            }
+                        } else {
+                            console.error('Failed to fetch optimization metrics:', data);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching optimization metrics:', error);
+                    });
+            }
+
+            function updateResults(data) {
+                console.log('Updating results with data:', data);
+
+                if (!data) {
+                    console.error('No data provided to updateResults');
+                    alert('No optimization results found. Please try again.');
+                    return;
+                }
+
+                // Destroy all existing charts first
+                destroyCharts();
+
+                // Update fitness score
+                const fitnessScoreElement = document.getElementById('fitnessScore');
+                if (fitnessScoreElement) {
+                    const fitnessScore = data.fitness_score || 0;
+                    fitnessScoreElement.textContent = (fitnessScore * 100).toFixed(2) + '%';
+                }
+
+                // Initialize fitness chart
+                const fitnessCtx = document.getElementById('fitnessChart');
+                if (fitnessCtx) {
+                    fitnessChart = new Chart(fitnessCtx, {
+                        type: 'line',
+                        data: {
+                            labels: ['Current'],
+                            datasets: [{
+                                label: 'Fitness Score',
+                                data: [(data.fitness_score || 0) * 100],
+                                borderColor: '#007bff',
+                                tension: 0.1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 100,
+                                    title: {
+                                        display: true,
+                                        text: 'Fitness Score (%)'
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return `${context.dataset.label}: ${context.formattedValue}%`;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Initialize metrics radar chart
+                const metricsCtx = document.getElementById('metricsChart');
+                if (metricsCtx) {
+                    metricsChart = new Chart(metricsCtx, {
+                        type: 'radar',
+                        data: {
+                            labels: ['Waiting Time', 'Utilization', 'Peak Coverage', 'Cost'],
+                            datasets: [{
+                                label: 'Optimization Metrics',
+                                data: [
+                                    (data.fitness_metrics?.waiting_time || 0) * 100,
+                                    (data.fitness_metrics?.utilization || 0) * 100,
+                                    (data.fitness_metrics?.peak_coverage || 0) * 100,
+                                    (data.fitness_metrics?.cost || 0) * 100
+                                ],
+                                backgroundColor: 'rgba(0, 123, 255, 0.2)',
+                                borderColor: '#007bff',
+                                borderWidth: 2,
+                                pointBackgroundColor: '#007bff',
+                                pointRadius: 4
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                r: {
+                                    beginAtZero: true,
+                                    max: 100,
+                                    ticks: {
+                                        stepSize: 20,
+                                        callback: value => value + '%'
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top'
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return context.raw.toFixed(1) + '%';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                // Update demand patterns chart
+                if (data.demand_patterns) {
+                    console.log('Demand patterns data:', data.demand_patterns); // Debug log
+
+                    const demandCtx = document.getElementById('demandChart');
+                    if (demandCtx) {
+                        if (demandChart) {
+                            demandChart.destroy();
+                        }
+                        
+                        demandChart = new Chart(demandCtx, {
+                            type: 'bar',
+                            data: {
+                                labels: Array.from({length: 24}, (_, i) => 
+                                    `${String(i).padStart(2, '0')}:00`
+                                ),
+                                datasets: [{
+                                    label: 'Passenger Demand',
+                                    data: data.demand_patterns,
+                                    backgroundColor: '#007bff',
+                                    borderColor: '#0056b3',
+                                    borderWidth: 1,
+                                    barPercentage: 0.8,
+                                    categoryPercentage: 0.9
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    tooltip: {
+                                        callbacks: {
+                                            title: (items) => `Time: ${items[0].label}`,
+                                            label: (item) => `Passengers: ${item.raw}`
+                                        }
+                                    },
+                                    legend: {
+                                        display: true,
+                                        position: 'top'
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Number of Passengers',
+                                            font: {
+                                                size: 14,
+                                                weight: 'bold'
+                                            }
+                                        },
+                                        grid: {
+                                            display: true,
+                                            color: 'rgba(0,0,0,0.1)'
+                                        }
+                                    },
+                                    x: {
+                                        title: {
+                                            display: true,
+                                            text: 'Time of Day',
+                                            font: {
+                                                size: 14,
+                                                weight: 'bold'
+                                            }
+                                        },
+                                        grid: {
+                                            display: false
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+
+
+                // Update fleet results table
+                const fleetTable = document.getElementById('fleetResults');
+                if (fleetTable) {
+                    const tbody = fleetTable.getElementsByTagName('tbody')[0];
+                    tbody.innerHTML = '';
+                    
+                    const optimizedFleet = data.optimized_fleet || {};
+                    const currentFleet = data.current_fleet || {};
+
+                    for (const [route, fleet_size] of Object.entries(optimizedFleet)) {
+                        const current = currentFleet[route] || 0;
+                        const change = fleet_size - current;
+                        const row = tbody.insertRow();
+                        
+                        row.innerHTML = `
+                            <td>${route}</td>
+                            <td>${current}</td>
+                            <td>${fleet_size}</td>
+                            <td>
+                                <span class="improvement-indicator ${change >= 0 ? 'improvement-positive' : 'improvement-negative'}">
+                                    ${change >= 0 ? '+' : ''}${change}
+                                </span>
+                            </td>
+                            <td>${((data.fitness_metrics?.bus_utilization || 0) * 100).toFixed(1)}%</td>
+                        `;
+                    }
+                }
+
+                // Update schedule results
+                const scheduleResults = document.getElementById('scheduleResults');
+                if (scheduleResults) {
+                    scheduleResults.innerHTML = '';
+
+                    const optimizedSchedules = data.optimized_schedules || {};
+
+                    for (const [route, schedules] of Object.entries(optimizedSchedules)) {
+                        const scheduleCard = document.createElement('div');
+                        scheduleCard.className = 'card mb-3';
+                        
+                        let scheduleHtml = `
+                            <div class="card-header">
+                                <h6 class="mb-0">Route: ${route}</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Bus</th>
+                                                <th>Weekdays</th>
+                                                <th>Friday</th>
+                                                <th>Weekends</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                        `;
+
+                        for (const [bus, schedule] of Object.entries(schedules)) {
+                            scheduleHtml += `
+                                <tr>
+                                    <td>${bus}</td>
+                                    <td>${formatScheduleTimes(schedule.weekdays)}</td>
+                                    <td>${formatScheduleTimes(schedule.friday)}</td>
+                                    <td>${formatScheduleTimes(schedule.weekends)}</td>
+                                </tr>
+                            `;
+                        }
+
+                        scheduleHtml += `
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        `;
+
+                        scheduleCard.innerHTML = scheduleHtml;
+                        scheduleResults.appendChild(scheduleCard);
+                    }
+                }
+
+                // Initialize demand chart
+                try {
+                    const demandPatterns = data.demand_patterns || new Array(24).fill(0);
+                    if (demandPatterns) {
+                        const demandCtx = document.getElementById('demandChart');
+                        if (demandCtx) {
+                            demandChart = new Chart(demandCtx, {
+                                type: 'bar',
+                                data: {
+                                    labels: Array.from({length: 24}, (_, i) => 
+                                        `${String(i).padStart(2, '0')}:00`
+                                    ),
+                                    datasets: [{
+                                        label: 'Passenger Demand',
+                                        data: demandPatterns,
+                                        backgroundColor: '#007bff',
+                                        borderColor: '#0056b3',
+                                        borderWidth: 1,
+                                        barPercentage: 0.8,
+                                        categoryPercentage: 0.9
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        tooltip: {
+                                            callbacks: {
+                                                title: (items) => `Time: ${items[0].label}`,
+                                                label: (item) => `Passengers: ${item.raw}`
+                                            }
+                                        },
+                                        legend: {
+                                            display: true,
+                                            position: 'top'
+                                        }
+                                    },
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true,
+                                            title: {
+                                                display: true,
+                                                text: 'Number of Passengers',
+                                                font: {
+                                                    size: 14,
+                                                    weight: 'bold'
+                                                }
+                                            },
+                                            grid: {
+                                                display: true,
+                                                color: 'rgba(0,0,0,0.1)'
+                                            }
+                                        },
+                                        x: {
+                                            title: {
+                                                display: true,
+                                                text: 'Time of Day',
+                                                font: {
+                                                    size: 14,
+                                                    weight: 'bold'
+                                                }
+                                            },
+                                            grid: {
+                                                display: false
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error initializing demand chart:', error);
+                }
+
+                // Show results section
+                const resultsSection = document.getElementById('results');
+                if (resultsSection) {
+                    resultsSection.style.display = 'block';
+                    resultsSection.scrollIntoView({ behavior: 'smooth' });
+                }
+            }            
+
+            function formatScheduleTimes(times) {
+                if (!times || !times.length) return 'No schedules';
+                return times.slice(0, 3).join(', ') + (times.length > 3 ? ` (+${times.length - 3} more)` : '');
+            }
+
+            function optimizeUserTravel(travelData) {
+                return fetch('/optimize_travel', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(travelData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'error') {
+                        throw new Error(data.message);
+                    }
+                    return data.result;
+                });
+            }
+
+            function optimizeFleet(optimizationParams) {
+                return fetch('/optimize_fleet', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(optimizationParams)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errorData => {
+                            throw new Error(errorData.message || 'Optimization failed');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Optimization Response:', data);  // Debug logging
+                    
+                    if (data.status === 'error') {
+                        throw new Error(data.message);
+                    }
+                    
+                    // Ensure result exists
+                    if (!data.result) {
+                        throw new Error('No optimization results found');
+                    }
+                    
+                    return data.result;
+                });
+            }
+
+            // Form submission handler
+            optimizationForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Destroy existing charts before starting new optimization
+                destroyCharts();
+                
+                // Show loading overlay
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                loadingOverlay.style.display = 'flex';
+
+                // Update progress bar
+                const progressBar = loadingOverlay.querySelector('.progress-bar');
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    progress += 5;
+                    if (progress <= 90) {
+                        progressBar.style.width = progress + '%';
+                    }
+                }, 500);
+
+                try {
+                    // Collect optimization parameters
+                    const optimizationParams = {
+                        population_size: parseInt(document.querySelector('input[name="population_size"]').value),
+                        generations: parseInt(document.querySelector('input[name="generations"]').value),
+                        mutation_rate: parseFloat(document.querySelector('input[name="mutation_rate"]').value)
+                    };
+
+                    // Run fleet optimization
+                    const result = await optimizeFleet(optimizationParams);
+                    
+                    // Set progress to 100% when request completes
+                    progressBar.style.width = '100%';
+                    clearInterval(progressInterval);
+                    
+                    // Hide loading overlay after a short delay
+                    setTimeout(() => {
+                        loadingOverlay.style.display = 'none';
+                        progressBar.style.width = '0%';
+                    }, 500);
+
+                    // Update results display
+                    updateResults(result);
+
+                    // Show results section
+                    resultsSection.style.display = 'block';
+                    resultsSection.scrollIntoView({ behavior: 'smooth' });
+
+                } catch (error) {
+                    clearInterval(progressInterval);
+                    loadingOverlay.style.display = 'none';
+                    progressBar.style.width = '0%';
+                    console.error('Error:', error);
+                    alert(`Error during optimization: ${error.message}`);
+                }
+            });
+
+            // Initialize tooltips
+            $(function () {
+                $('[data-toggle="tooltip"]').tooltip();
+            });
+
+            // Load initial system status
+            fetch('/api/system_status')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('currentFleetSize').textContent = data.total_fleet;
+                    document.getElementById('activeRoutes').textContent = data.active_routes;
+                    document.getElementById('peakHours').textContent = data.peak_hours;
+                    document.getElementById('avgDailyTrips').textContent = data.avg_daily_trips;
+                    destroyCharts();
+                    initializeOptimizationCharts();
+                })
+                .catch(error => console.error('Error loading system status:', error));
+        });
+
+        function initializeDemandChart(data) {
+            const demandCtx = document.getElementById('demandChart');
+            
+            if (!demandCtx) {
+                console.error('Demand chart canvas not found');
+                return;
+            }
+
+            try {
+                const demandChartContext = demandCtx.getContext('2d');
+                
+                if (window.demandChart) {
+                    window.demandChart.destroy();
+                }
+                
+                window.demandChart = new Chart(demandChartContext, {
+                    type: 'bar',
+                    data: {
+                        labels: Array.from({length: 24}, (_, i) => 
+                            `${String(i).padStart(2, '0')}:00`
+                        ),
+                        datasets: [{
+                            label: 'Passenger Demand',
+                            data: data,
+                            backgroundColor: '#007bff',
+                            borderColor: '#0056b3',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    title: (items) => `Time: ${items[0].label}`,
+                                    label: (item) => `Passengers: ${item.raw}`
+                                }
+                            },
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Number of Passengers',
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                },
+                                grid: {
+                                    display: true,
+                                    color: 'rgba(0,0,0,0.1)'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Time of Day',
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error initializing demand chart:', error);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Login | UBUS</title>
+   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+   <style>
+       body {
+           background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+           min-height: 100vh;
+           display: flex;
+           align-items: center;
+           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       }
+
+       .login-container {
+           max-width: 400px;
+           margin: 0 auto;
+           padding: 30px;
+           background: white;
+           border-radius: 15px;
+           box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+           position: relative;
+       }
+
+       .login-header {
+           text-align: center;
+           margin-bottom: 30px;
+       }
+
+       .login-header i {
+           font-size: 48px;
+           color: #007bff;
+           margin-bottom: 15px;
+       }
+
+       .form-group {
+           position: relative;
+           margin-bottom: 25px;
+       }
+
+       .form-group i {
+           position: absolute;
+           left: 15px;
+           top: 50%;
+           transform: translateY(-50%);
+           color: #007bff;
+       }
+
+       .form-control {
+           padding-left: 45px;
+           height: 50px;
+           border-radius: 25px;
+           border: 2px solid #e1e1e1;
+           transition: all 0.3s ease;
+       }
+
+       .form-control:focus {
+           border-color: #007bff;
+           box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.15);
+       }
+
+       .btn {
+           height: 50px;
+           border-radius: 25px;
+           font-size: 16px;
+           font-weight: 600;
+           text-transform: uppercase;
+           letter-spacing: 1px;
+           transition: all 0.3s ease;
+           margin-bottom: 15px;
+       }
+
+       .btn:hover {
+           transform: translateY(-2px);
+           box-shadow: 0 5px 15px rgba(0,123,255,0.3);
+       }
+
+       .home-btn {
+           position: absolute;
+           top: 20px;
+           left: 20px;
+           width: 40px;
+           height: 40px;
+           border-radius: 50%;
+           background: #007bff;
+           color: white;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           text-decoration: none;
+           transition: all 0.3s ease;
+       }
+
+       .home-btn:hover {
+           background: #0056b3;
+           transform: translateY(-2px);
+           box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+           color: white;
+       }
+
+       .status-message {
+           display: none;
+           margin-bottom: 20px;
+           padding: 10px;
+           border-radius: 8px;
+           text-align: center;
+       }
+
+       .status-message.error {
+           background-color: #f8d7da;
+           border: 1px solid #f5c6cb;
+           color: #721c24;
+       }
+
+       .status-message.success {
+           background-color: #d4edda;
+           border: 1px solid #c3e6cb;
+           color: #155724;
+       }
+
+       .role-buttons {
+           display: flex;
+           gap: 15px;
+           margin-bottom: 25px;
+           justify-content: center;
+       }
+
+       .role-btn {
+           flex: 1;
+           max-width: 180px;
+           opacity: 0.85;
+           border: 2px solid transparent;
+           padding: 10px 20px;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           gap: 10px;
+       }
+
+       .role-btn i {
+           font-size: 1.2em;
+           margin: 0;
+       }
+
+       .role-btn.active {
+           opacity: 1;
+           border-color: #0056b3;
+           box-shadow: 0 3px 10px rgba(0,123,255,0.2);
+           background-color: #f8f9fa;
+       }
+
+       .role-selection-prompt {
+           text-align: center;
+           color: #6c757d;
+           margin-bottom: 15px;
+           font-size: 0.9em;
+       }
+
+       .role-btn:hover {
+           opacity: 1;
+           background-color: #007bff;
+           color: white;
+           border-color: #007bff;
+       }
+       
+       .role-btn:hover i {
+           color: white;
+       }
+
+       .password-field {
+           position: relative;
+       }
+
+       .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: #6c757d; 
+            padding: 0;
+            z-index: 2;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            margin: 0;
+            width: 40px;
+            justify-content: center;
+        }
+
+       .password-toggle:focus {
+           outline: none;
+       }
+
+       .password-toggle:hover {
+            color: #007bff;
+        }
+
+       .form-control.password-input {
+           padding-right: 40px;
+       }
+   </style>
+</head>
+<body>
+   <div class="container">
+       <a href="{{ url_for('home') }}" class="home-btn">
+           <i class="fas fa-home"></i>
+       </a>
+
+       <div class="login-container">
+            <div class="login-header">
+                <i class="fas fa-user-shield"></i>
+                <h2 class="mb-4">Login</h2>
+            </div>
+            
+            {% if success_message %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle mr-2"></i>{{ success_message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            {% endif %}
+            
+            <div id="status-message" class="status-message"></div>
+
+           <form id="loginForm" method="POST">
+               <input type="hidden" name="role" id="selectedRole" value="">
+               
+               <div class="role-selection-prompt">
+                   <i class="fas fa-info-circle"></i> Please select your role to continue
+               </div>
+               <div class="role-buttons">
+                   <button type="button" class="btn btn-outline-primary role-btn" data-role="administrator">
+                       <i class="fas fa-user-shield"></i>
+                       <span>Admin</span>
+                   </button>
+                   <button type="button" class="btn btn-outline-primary role-btn" data-role="driver">
+                       <i class="fas fa-bus"></i>
+                       <span>Driver</span>
+                   </button>
+               </div>
+
+               <div class="form-group">
+                   <i class="fas fa-user"></i>
+                   <input type="text" class="form-control" name="username" placeholder="Username" required>
+               </div>
+               <div class="form-group password-field">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" class="form-control password-input" name="password" placeholder="Password" required>
+                    <button type="button" class="password-toggle" aria-label="Toggle password visibility">
+                        <i class="fas fa-eye-slash"></i>
+                    </button>
+                </div>
+               <button type="submit" class="btn btn-primary btn-block" disabled>
+                   <i class="fas fa-sign-in-alt mr-2"></i>
+                   Login
+               </button>
+           </form>
+       </div>
+   </div>
+
+   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+   <script>
+       $(document).ready(function() {
+           // Auto hide success message after 3 seconds
+           const alertSuccess = $('.alert-success');
+           if (alertSuccess.length > 0) {
+               setTimeout(function() {
+                   alertSuccess.fadeOut('slow');
+               }, 3000);
+           }
+
+           $('.role-btn').click(function() {
+               $('.role-btn').removeClass('active');
+               $(this).addClass('active');
+               $('#selectedRole').val($(this).data('role'));
+               $('button[type="submit"]').prop('disabled', false);
+           });
+
+            // Add new password toggle functionality
+            $('.password-toggle').click(function() {
+                const passwordInput = $(this).siblings('input');
+                const icon = $(this).find('i');
+                
+                if (passwordInput.attr('type') === 'password') {
+                    passwordInput.attr('type', 'text');
+                    icon.removeClass('fa-eye-slash').addClass('fa-eye'); 
+                } else {
+                    passwordInput.attr('type', 'password');
+                    icon.removeClass('fa-eye').addClass('fa-eye-slash');
+                }
+            });
+
+           $('#loginForm').on('submit', function(e) {
+               e.preventDefault();
+               
+               if (!$('#selectedRole').val()) {
+                   const statusMessage = $('#status-message');
+                   statusMessage
+                       .removeClass('success')
+                       .addClass('error')
+                       .html('<i class="fas fa-exclamation-circle mr-2"></i>Please select a role')
+                       .show();
+
+                   setTimeout(function() {
+                       statusMessage.fadeOut('slow');
+                   }, 3000);
+                   return;
+               }
+
+               const formData = $(this).serialize();
+               console.log('Form data:', formData); // Debug log
+
+               const statusMessage = $('#status-message');
+               const submitButton = $('button[type="submit"]');
+
+               // Disable submit button while processing
+               submitButton.prop('disabled', true);
+
+               $.ajax({
+                   url: '/auth_login',
+                   method: 'POST',
+                   data: formData,
+                   success: function(response) {
+                       console.log('Server response:', response); // Debug log
+                       
+                       if (response.status === 'success') {
+                           statusMessage
+                               .removeClass('error')
+                               .addClass('success')
+                               .html('<i class="fas fa-check-circle mr-2"></i>Login successful!')
+                               .show();
+                           
+                           console.log('Redirecting to:', response.redirect); // Debug log
+                           setTimeout(function() {
+                               window.location.href = response.redirect;
+                           }, 1000);
+                       } else {
+                           statusMessage
+                               .removeClass('success')
+                               .addClass('error')
+                               .html('<i class="fas fa-exclamation-circle mr-2"></i>' + response.message)
+                               .show();
+
+                           setTimeout(function() {
+                               statusMessage.fadeOut('slow');
+                           }, 3000);
+
+                           // Re-enable submit button on error
+                           submitButton.prop('disabled', false);
+                       }
+                   },
+                   error: function(xhr, status, error) {
+                       console.log('AJAX error:', error); // Debug log
+                       statusMessage
+                           .removeClass('success')
+                           .addClass('error')
+                           .html('<i class="fas fa-exclamation-circle mr-2"></i>An error occurred. Please try again.')
+                           .show();
+
+                       setTimeout(function() {
+                           statusMessage.fadeOut('slow');
+                       }, 3000);
+
+                       // Re-enable submit button on error
+                       submitButton.prop('disabled', false);
+                   }
+               });
+           });
+       });
+   </script>
+</body>
+</html>

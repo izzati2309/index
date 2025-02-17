@@ -1,0 +1,7 @@
+Flask==2.0.1
+Werkzeug==2.0.1
+Flask-SQLAlchemy==2.5.1
+SQLAlchemy==1.4.46
+geopy==2.2.0
+folium==0.12.1
+
